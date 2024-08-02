@@ -1,11 +1,87 @@
+# Ignore OS generated files
+.DS_Store
+Thumbs.db
+
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignore virtual environment directories
+env/
+venv/
+.venv/
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Ignore compiled files
+*.o
 *.pyc
-.pytest_cache/
-sphinx_docs/build
-sphinx_docs/source/doctrees/*
-coverage_html_report/
-cov.xml
-.coverage
-*.egg-info
-tests_unfinished
+*.pyo
+*.pyd
+*.so
+*.dll
+*.dylib
+*.exe
+
+# Ignore directories created by build tools
+build/
+dist/
+*.egg-info/
+
+# Ignore log files and temporary files
+*.log
+*.tmp
+*.swp
+*.bak
+
+# Ignore files ending with ~
+*~
+
+# Ignore IDE and editor specific files
 .vscode/
-docs/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Ignore files related to version control
+.git/
+.hg/
+.svn/
+.cvsignore
+
+# Ignore personal configuration files
+*.env
+*.ini
+*.config
+*.settings
+
+# Ignore data files
+*.csv
+*.tsv
+*.data
+*.dat
+
+# Ignore binary files
+*.bin
+*.out
+
+# Ignore documentation files
+*.pdf
+*.doc
+*.docx
+
+# Ignore images
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+
+# Ignore root and CMS specific files
+higgsCombine*.root
+*.root
+
+# Add any custom rules below
+# Custom rules:

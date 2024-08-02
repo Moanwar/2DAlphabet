@@ -28,6 +28,21 @@ def open_json(f):
 
     return input_config
 
+def rename_files(directory):
+    # Construct the pattern to match files                                                                                                              
+    pattern = os.path.join(directory, 'higgsCombine_paramFit_Test_*mH0.123456.root')
+    # List of files matching the pattern                                                                                                                
+    files = glob.glob(pattern)
+    for file in files:
+        # Extract the base file name and directory                                                                                                      
+        dirname, basename = os.path.split(file)
+        # Construct the new file name                                                                                                                   
+        new_basename = basename.replace('.123456.root', '.root')
+        new_file = os.path.join(dirname, new_basename)
+        # Rename the file                                                                                                                               
+        os.rename(file, new_file)
+        print(f'Renamed: {file} -> {new_file}')
+
 def ascii_encode_dict(data): 
     '''Convert a unicode encoded dictionary into ascii.
 

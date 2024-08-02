@@ -2,7 +2,7 @@ import argparse, os, itertools, pandas, glob, pickle, sys, re, random, copy, num
 from collections import OrderedDict
 from TwoDAlphabet.config import Config, OrganizedHists
 from TwoDAlphabet.binning import Binning
-from TwoDAlphabet.helpers import CondorRunner, execute_cmd, parse_arg_dict, unpack_to_line, make_RDH, cd, _combineTool_impacts_fix
+from TwoDAlphabet.helpers import CondorRunner, execute_cmd, parse_arg_dict, unpack_to_line, make_RDH, cd, _combineTool_impacts_fix, rename_files
 from TwoDAlphabet.alphawrap import Generic2D
 from TwoDAlphabet import plot
 import ROOT
@@ -593,7 +593,7 @@ class TwoDAlphabet:
                 remakeEnv=makeEnv
                     )
                     condor.submit()
-                
+
     def Impacts(self, subtag, rMin=-15, rMax=15, cardOrW='initialFitWorkspace.root --snapshotName initialFit', defMinStrat=0, blindData=True, extra=''):
         # param_str = '' if setParams == {} else '--setParameters '+','.join(['%s=%s'%(p,v) for p,v in setParams.items()])
         with cd(self.tag+'/'+subtag):
@@ -610,23 +610,48 @@ class TwoDAlphabet:
                 '--rMax %s'%rMax, '-d %s'%card_or_w,
                 '--cminDefaultMinimizerStrategy {} -m 0'.format(defMinStrat),
                 impact_nuis_str, extra, #param_str,
-                '-t -1 --bypassFrequentistFit' if blindData else ''
+                ' --bypassFrequentistFit' if blindData else ''
             ]
             # Remove old runs if they exist
+            execute_cmd(" pwd ")
+            execute_cmd(" ls ")
             execute_cmd('rm *_paramFit_*.root *_initialFit_*.root')
+            execute_cmd(" ls ")
+            execute_cmd(" pwd ")
             # Step 1
             execute_cmd('combineTool.py %s --doInitialFit'%(' '.join(base_opts)))
+            execute_cmd(" ls ")
+            execute_cmd(" pwd ")
             # Dumb hack - combineTool --doFits will go looking for the wrong file if you run on a toy
-            _combineTool_impacts_fix('higgsCombine_initialFit_Test.MultiDimFit.mH0.root')
-            
+            initial_fit_file = 'higgsCombine_initialFit_Test.MultiDimFit.mH0.123456.root'
+            backup_fit_file = 'higgsCombine_impactToy.GenerateOnly.mH120.123456.root'
+            execute_cmd(" pwd ")
+            #if os.path.exists(initial_fit_file):
+            execute_cmd(" ls ")
+            _combineTool_impacts_fix(initial_fit_file)
+            execute_cmd(" mv higgsCombine_initialFit_Test.MultiDimFit.mH0.123456.root  higgsCombine_initialFit_Test.MultiDimFit.mH0.root")
+            #else:
+            #_combineTool_impacts_fix(backup_fit_file)
+            execute_cmd(" pwd ")
+            #_combineTool_impacts_fix('higgsCombine_initialFit_Test.MultiDimFit.mH0.root')
+            execute_cmd(" ls ")            
             # Step 2
             execute_cmd('combineTool.py %s --doFits'%(' '.join(base_opts)))
+            execute_cmd(" ls ")
+            execute_cmd(" pwd ")
             # Dumb hack - combineTool next step will go looking for the wrong file if you run on a toy
-            _combineTool_impacts_fix('higgsCombine_paramFit_Test_*.MultiDimFit.mH0.root')
+            #_combineTool_impacts_fix('higgsCombine_paramFit_Test_*.MultiDimFit.mH0.123456.root')
+            current_directory = os.getcwd()  # Get the current working directory
+            rename_files(current_directory)
+            execute_cmd(" ls ")
+            execute_cmd(" pwd ")
 
             # Grab the output
             execute_cmd('combineTool.py %s -o impacts.json'%(' '.join(base_opts)))
+            execute_cmd(" ls ")
             execute_cmd('plotImpacts.py -i impacts.json -o impacts')
+            execute_cmd(" ls ")
+            execute_cmd(" pwd ")
 
 class Ledger():
     def __init__(self, df):
@@ -936,8 +961,11 @@ def _runMLfit(cardOrW, blinding, verbosity, rMin, rMax, setParams, usePreviousFi
     if os.path.isfile('fitDiagnosticsTest.root'):
         execute_cmd('rm fitDiagnosticsTest.root')
 
+    execute_cmd("cmsenv")
     execute_cmd(fit_cmd, out='FitDiagnostics.log')
 
+    execute_cmd("source $CMSSW_11_3_4/src/twoD-env/bin/activate")
+    
 def _runLimit(blindData, verbosity, setParams, card_or_w='card.txt', condor=False):
     # card_or_w could be `morphedWorkspace.root --snapshotName morphedModel`
     param_options = ''

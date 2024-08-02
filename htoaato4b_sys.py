@@ -32,14 +32,14 @@ HB_DIR = '/afs/cern.ch/user/h/hboucham/public/'
 MD_DIR = '/eos/user/m/moanwar/htoaa/analysis/VBF_channel'
 
 if CAT == 'VBFjjLo':
-    PATH    = MD_DIR+'/2DAlphabetfiles_VBFjjLo'
+    PATH    = MD_DIR+'/2DAlphabetfiles_VBFjjLo_sys'
     SIGS    = ['VBFH']
     FIT     =  '2d2C'  ## Reasonable GoF for both WP40 and WP60
     FITLIST = ['2d2C']
     NOMTF   = (0.1 if WP == 'WP40' else 0.6)
 
 if CAT == 'VBFjjHi':
-    PATH    = MD_DIR+'/2DAlphabetfiles_VBFjjHi'
+    PATH    = MD_DIR+'/2DAlphabetfiles_VBFjjHi_sys'
     SIGS    = ['VBFH']
     FIT     =  '2d2C'  ## Reasonable GoF for both WP40 and WP60
     FITLIST = ['2d2C']
@@ -133,7 +133,7 @@ def _select_signal(row, args):
 
 def _load_rpf(poly_order):
     twoD_for_rpf = TwoDAlphabet('fits_%s_Htoaato4b_mH_%s_mA_%s_%s_%s' % (CAT, MASSH, MASSA, WP, YEAR),
-                                '%s_Htoaato4b.json' % CATL, loadPrevious=True,
+                                '%s_Htoaato4b_sys.json' % CATL, loadPrevious=True,
                                 findreplace={'path':PATH, 'SIGNAME':_sig_names(),
                                              'HIST':'$process_%s_%s_$region_Nom' % (MASSH, WP)})
     params_to_set = twoD_for_rpf.GetParamsOnMatch('rpf.*'+poly_order, 'mA_all_area', 'b')
@@ -241,9 +241,11 @@ def test_make(SRorCR):
     # in this case a specific signal model (production mode and "a" boson mass)
     # 'SIGNAME' also gets used as the $process in _batch_replace
     twoD = TwoDAlphabet('fits_%s_Htoaato4b_mH_%s_mA_%s_%s_%s' % (CAT, MASSH, MASSA, WP, YEAR),
-                        '%s_Htoaato4b.json' % CATL, loadPrevious=False, verbose=VERBOSE,
+                        '%s_Htoaato4b_sys.json' % CATL, loadPrevious=False, verbose=VERBOSE,
                         findreplace={'path':PATH, 'SIGNAME':_sig_names(),
-                                     'HIST':'$process_%s_%s_$region_Nom' % (MASSH, WP)})
+                                     'HIST':'$process_%s_%s_$region_Nom' % (MASSH, WP),
+                                     'HISTUp':'$process_%s_%s_$region_$systUp' % (MASSH, WP),
+                                     'HISTDown':'$process_%s_%s_$region_$systDown' % (MASSH, WP)} )
     if VERBOSE: print('Completed first TwoDAlphabet with loadPrevious=False')
     # Initial "QCD" template simply equals data - all MC backgrounds
     # Is this really what we want for the "Pass" region as well? - AWB 2024.05.21
@@ -530,6 +532,7 @@ def test_Impacts(SRorCR, massA):
         extra='-t 1 --toysFile %s' % toy_file_path.split('/')[-1]
     )
 
+
 def test_generate_for_SR(massA):
     '''NOTE: This is an expert-level manipulation that requires understanding the underlying Combine
     commands. Use and change it only if you understand what each step is doing.
@@ -604,9 +607,9 @@ if __name__ == '__main__':
     test_plot('SR')         ## Plot data vs. prediction, pre-fit and post-fit
     test_limit('SR')        ## Compute expected asymptotic limits
     test_GoF('SR')          ## Perform goodness-of-fit (GoF) test with toys
-    # midMA = MASSESA[math.floor(len(MASSESA) / 2)]
+    midMA = MASSESA[math.floor(len(MASSESA) / 2)]
     # test_SigInj('SR', midMA)       ## Presumably performs some signal injection test (?)
-    # test_Impacts('SR', midMA)      ## Test impact of systematic uncertainties (?)
+    test_Impacts('SR', midMA)      ## Test impact of systematic uncertainties (?)
     # # test_generate_for_SR()  ## Absolutely no idea (???)
     # ## If using condor, run after condor jobs finish
     test_GoF_plot('SR')     ## Plot results of GoF tests
